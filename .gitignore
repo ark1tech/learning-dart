@@ -60,3 +60,5 @@ Temporary Items
 ### macOS Patch ###
 # iCloud generated files
 *.icloud
+
+_main.dart
