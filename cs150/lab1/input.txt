@@ -1,0 +1,4 @@
+flowers: [kalachuchis, daisies, sakuras]
+colors: [red, blue, green]
+nouns: [paper bag, tumbler, light]
+adjectives: [beautiful, perfect, patient]

@@ -23,3 +23,80 @@
 // height: if the heights are within 15cm of each other
 // zodiac: if the two zodiacs match (this isn't really the case, but for simplicity's sake we'll stick with this)
 // favorite color: if the two colors match
+
+import 'dart:io';
+
+class Preference {
+  final int age;
+  final double height;
+  final String zodiac;
+  final String favColor;
+
+  const Preference({
+    required this.age,
+    required this.height,
+    required this.zodiac,
+    required this.favColor,
+  });
+
+  factory Preference.fromArgs(List<String> args) {
+    try {
+      if (args.length != 4) {
+        throw ArgumentError('Expected exactly 4 arguments, got ${args.length}');
+      }
+
+      final age = int.parse(args[0]);
+      final height = double.parse(args[1]);
+      final zodiac = args[2];
+      final favColor = args[3];
+
+      return Preference(
+        age: age,
+        height: height,
+        zodiac: zodiac,
+        favColor: favColor,
+      );
+    } catch (e) {
+      print("Error: $e");
+      exit(1);
+    }
+  }
+
+  @override
+  String toString() {
+    return 'age: $age\nheight: $height\nzodiac: $zodiac\nfavColor: $favColor';
+  }
+}
+
+List<String> checkIncompatibility(Preference pref1, Preference pref2) {
+  List<String> incompatiblePrefList = [];
+  if (pref1.age < 18 || pref2.age < 18 || (pref1.age - pref2.age).abs() > 5) {
+    incompatiblePrefList.add("age");
+  }
+  if ((pref1.height - pref2.height).abs() > 15) {
+    incompatiblePrefList.add("height");
+  }
+  if (pref1.zodiac.toLowerCase() != pref2.zodiac.toLowerCase()) {
+    incompatiblePrefList.add("zodiac");
+  }
+  if (pref1.favColor.toLowerCase() != pref2.favColor.toLowerCase()) {
+    incompatiblePrefList.add("fav color");
+  }
+
+  return incompatiblePrefList;
+}
+
+void main(List<String> args) {
+  Preference argsPref = Preference.fromArgs(args);
+  Preference myPref = Preference(
+    age: 18,
+    height: 6.5,
+    zodiac: "leo",
+    favColor: "green",
+  );
+  if (checkIncompatibility(argsPref, myPref).length == 0) {
+    print("It's a match!");
+    return;
+  }
+  print("We're not meant to be :(");
+}
