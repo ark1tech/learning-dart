@@ -16,8 +16,44 @@
 
 // and print out the categorized songs:
 
-// Certified bops: song 1, song 2, song 3     
-// I can vibe with this: song 4     
+// Certified bops: song 1, song 2, song 3
+// I can vibe with this: song 4
 // Not my jam: song 5, song 6
 
 // 4. Get the average song rating and if it is greater than or equal to 5, print I like your taste in music!. Else, print Awww, I'm not a fan..
+
+import 'dart:io';
+import 'dart:math';
+
+void main() {
+  String? songRecoInput = stdin.readLineSync();
+  if (songRecoInput == null) {
+    exit(1);
+  }
+
+  List<String> notJam = [];
+  List<String> vibeBops = [];
+  List<String> certiBops = [];
+  int sumRating = 0;
+  double aveRating;
+
+  List<String> songRecoList = songRecoInput.split(",");
+  for (int songIndex = 0; songIndex < songRecoList.length; songIndex++) {
+    int rating = Random().nextInt(11);
+    sumRating += rating;
+    if (0 <= rating && rating <= 4) {
+      notJam.add("song $songIndex");
+    } else if (5 <= rating && rating <= 7) {
+      vibeBops.add("song $songIndex");
+    } else {
+      // 8-10 rating
+      certiBops.add("song $songIndex");
+    }
+  }
+  aveRating = (sumRating / songRecoList.length);
+  if (aveRating >= 5) {
+    print("I like your taste in music!");
+    return;
+  }
+  print("Awww, I'm not a fan..");
+}

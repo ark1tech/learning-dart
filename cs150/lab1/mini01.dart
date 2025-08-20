@@ -6,3 +6,18 @@
 
 // Matching between the user input and the favorite dish variable should be case insensitive, so HOTDOG and hotdog and even HoTdOg should match.
 
+import 'dart:io';
+
+void main() {
+  String? dishInput = stdin.readLineSync();
+  if (dishInput == null) {
+    exit(1);
+  }
+  List<String> favoriteDishes = ['adobo', 'nilaga', 'cake'];
+  String dishInputLowCase = dishInput.toLowerCase();
+  if (favoriteDishes.contains(dishInputLowCase)) {
+    print("I like $dishInputLowCase too!");
+    return;
+  }
+  print("Aww, too bad..");
+}
