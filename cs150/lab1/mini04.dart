@@ -25,13 +25,13 @@
 
 import 'dart:io';
 import 'dart:convert';
-import 'dart:async';
+import 'dart:math';
 
 class LovePoem {
-  final String flowers;
-  final String colors;
-  final String nouns;
-  final String adjectives;
+  final List<String> flowers;
+  final List<String> colors;
+  final List<String> nouns;
+  final List<String> adjectives;
 
   const LovePoem({
     required this.flowers,
@@ -40,18 +40,20 @@ class LovePoem {
     required this.adjectives,
   });
 
-  factory LovePoem.fromTxtFile(List<String> args) {
-    final flowers = args[0];
-    final colors = args[1];
-    final nouns = args[2];
-    final adjectives = args[3];
-
-    return LovePoem(
-      flowers: flowers,
-      colors: colors,
-      nouns: nouns,
-      adjectives: adjectives,
-    );
+  void Generate(int stanzas, File outputFile) {
+    var outputSink = outputFile.openWrite(mode: FileMode.append);
+    for (int i = 0; i < stanzas; i++) {
+      outputSink.write(
+        "${flowers[Random().nextInt(flowers.length)]} are ${colors[Random().nextInt(colors.length)]}\n",
+      );
+      outputSink.write(
+        "${flowers[Random().nextInt(flowers.length)]} are ${colors[Random().nextInt(colors.length)]}\n",
+      );
+      outputSink.write(
+        "${nouns[Random().nextInt(nouns.length)]} is ${adjectives[Random().nextInt(adjectives.length)]}\n",
+      );
+      outputSink.write("and so are you\n\n");
+    }
   }
 }
 
@@ -73,26 +75,66 @@ void checkArgs(List<String> args) {
   }
 }
 
+int getStanzas() {
+  try {
+    print("How many stanzas?");
+    String? inputStanzas = stdin.readLineSync();
+    if (inputStanzas == null) {
+      throw FormatException();
+    }
+    int stanzas = int.parse(inputStanzas);
+    return stanzas;
+  } catch (e) {
+    print("Error: $e");
+    exit(1);
+  }
+}
+
 void main(List<String> args) async {
   checkArgs(args);
 
-  final inputTxtFile = File('${args[0]}');
-  final outputTxtFile = File('${args[1]}');
+  final inputFile = File('${args[0]}');
+  final outputFile = File('${args[1]}');
 
-  Stream<String> inputLines = inputTxtFile
+  int stanzas = getStanzas();
+
+  final categoryMap = <String, List<String>>{};
+  final lineRegex = RegExp(r'^(?<name>\w+):\s{1}(?<list>\[.*\])$');
+  const requiredKeys = ['flowers', 'colors', 'nouns', 'adjectives'];
+
+  final lines = inputFile
       .openRead()
       .transform(utf8.decoder)
-      .transform(LineSplitter());
+      .transform(const LineSplitter());
 
-  await for (String lines in inputLines) {
-    print("$lines");
+  await for (final line in lines) {
+    final match = lineRegex.firstMatch(line.trim());
+    if (match == null) {
+      exit(1);
+    }
+
+    final name = match.namedGroup('name')!;
+    final listContent = match
+        .namedGroup('list')!
+        .replaceAll(RegExp(r'[\[\]]'), '')
+        .split(',')
+        .map((s) => s.trim())
+        .toList();
+
+    if (!requiredKeys.contains(name)) {
+      print("Error: make sure format is correct in the input.txt file");
+      exit(1);
+    }
+
+    categoryMap[name] = listContent;
   }
 
-  // String contents = await inputTxtFile.readAsString();
-  // print(contents);
+  final poem = LovePoem(
+    flowers: categoryMap['flowers'] ?? [''],
+    colors: categoryMap['colors'] ?? [''],
+    nouns: categoryMap['nouns'] ?? [''],
+    adjectives: categoryMap['adjectives'] ?? [''],
+  );
 
-  // var logSink = outputTxtFile.openWrite(mode: FileMode.append);
-  // logSink.write('meow');
-
-  // logSink.close();
+  poem.Generate(stanzas, outputFile);
 }
