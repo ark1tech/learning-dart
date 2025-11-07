@@ -1,0 +1,72 @@
+import 'package:http/http.dart' as http;
+
+void main() {
+  var urls = [
+    "http://httpbin.org/delay/2", // 2 second delay
+    "http://httpbin.org/delay/1", // 1 second delay
+  ];
+
+  print("Starting sequential chain...");
+
+  http.get(Uri.parse(urls[0])).then((response1) {
+    print("First response: [Data for ${urls[0]}]");
+    
+    return http.get(Uri.parse(urls[1]));
+
+  }).then((response2) {
+    print("Second response: [Data for ${urls[1]}]");
+
+  }).then((_) {
+    print("Chain complete.");
+  });
+
+  print("End of main");
+}
+
+Starting sequential chain...
+End of main
+(approx. 2 seconds later)
+First response: [Data for http://httpbin.org/delay/2]
+(approx. 1 second after that)
+Second response: [Data for http://httpbin.org/delay/1]
+Chain complete.
+
+import 'package:http/http.dart' as http;
+
+void main() {
+  var urls = [
+    "http://httpbin.org/delay/3", // 3 sec
+    "http://httpbin.org/delay/1", // 1 sec
+    "http://httpbin.org/delay/2", // 2 sec
+  ];
+
+  List<Future<void>> responseFutures = [];
+
+  print("Starting all requests in parallel...");
+
+  for (var url in urls) {
+    print("Queueing fetch for $url");
+    var future = http.get(Uri.parse(url)).then((response) {
+      print("COMPLETED: $url [Data for $url]");
+    });
+    responseFutures.add(future);
+  }
+  Future.wait(responseFutures).then((_) {
+    print("--- All requests are finished. ---");
+  });
+
+  print("End of main");
+}
+
+Starting all requests in parallel...
+Queueing fetch for http://httpbin.org/delay/3
+Queueing fetch for http://httpbin.org/delay/1
+Queueing fetch for http://httpbin.org/delay/2
+End of main
+(approx. 1 second later)
+COMPLETED: http://httpbin.org/delay/1 [Data for http://httpbin.org/delay/1]
+(approx. 1 second after that)
+COMPLETED: http://httpbin.org/delay/2 [Data for http://httpbin.org/delay/2]
+(approx. 1 second after that)
+COMPLETED: http://httpbin.org/delay/3 [Data for http://httpbin.org/delay/3]
+--- All requests are finished. ---
